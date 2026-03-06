@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "prettier": "^3.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "name": "auto-commiter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^1.44.0",
+    "chalk": "^4.1.2",
+    "dotenv": "^17.3.1"
+  }
+}
