@@ -27,3 +27,11 @@ export const stageFiles = async (files: string[]) => {
   console.log({ filesString });
   await asyncExecuter(`git add ${filesString}`);
 };
+
+export const getStagedDiff = async (files: string[]) => {
+  const filesString = files.map((f) => `"${f}"`).join(' ');
+
+  const { stdout } = await asyncExecuter(`git diff --cached -- ${filesString}`);
+
+  return stdout;
+};

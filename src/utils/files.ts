@@ -28,3 +28,16 @@ export const expandDirectories = (files: FileChange[]): FileChange[] => {
 
   return expanded;
 };
+
+export const getFileCategory = (file: string) => {
+  const ext = file.split('.').pop()?.toLowerCase();
+
+  if (['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'go', 'rs', 'cpp', 'c', 'cs'].includes(ext || ''))
+    return 'code';
+
+  if (['html', 'css', 'scss', 'less'].includes(ext || '')) return 'markup';
+
+  if (['json', 'yaml', 'yml', 'toml'].includes(ext || '') || file === 'Dockerfile') return 'config';
+
+  return 'other';
+};
