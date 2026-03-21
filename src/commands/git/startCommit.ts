@@ -52,7 +52,6 @@ export default async (flags: any = {}) => {
 
     const diffs = await getStagedDiff(filenames);
     const diffSummary = analyzeDiff(diffs);
-    console.log({ diffSummary });
     analyzeSpinner.succeed('Analysis complete.\n');
 
     // 6️⃣ Commit message generation

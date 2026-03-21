@@ -41,7 +41,7 @@ export const getFilesChanged = async () => {
 };
 
 export const stageAll = async () => {
-  await asyncExecuter('git add .');
+  await asyncExecuter('git add -A');
 };
 
 export const stageFiles = async (files: string[]) => {
