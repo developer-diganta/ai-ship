@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import minimist from 'minimist';
-import runConfig from './utils/runConfig';
-import runCommit from './utils/runCommit';
+import runConfig from './commands/config';
+import runCommit from './commands/commit';
 import chalk from 'chalk';
 
 const startCommandExecution = async () => {

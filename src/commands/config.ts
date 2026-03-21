@@ -1,14 +1,13 @@
 import chalk from 'chalk';
 import {
-  deleteApiKey,
+  deleteConfigKey,
   getCurrentConfig,
   jsonConfig,
   log,
-  saveApiKey,
   saveValueToConfig,
   verboseConfig,
-} from './helper';
-import { askApiKey } from './inputs';
+} from '../utils/helper';
+import { askApiKey } from '../utils/inputs';
 import type { ParsedArgs } from 'minimist';
 type AIShipConfig = Record<string, any>;
 export default async (args: ParsedArgs) => {
@@ -60,10 +59,10 @@ export default async (args: ParsedArgs) => {
   }
   if (args['add-key']) {
     const apiKey = await askApiKey();
-    saveApiKey(apiKey);
+    saveValueToConfig('geminiApiKey', apiKey);
     log('API key saved!');
   } else if (args['delete-key']) {
-    if (deleteApiKey()) {
+    if (deleteConfigKey('geminiApiKey')) {
       log(chalk.green('API Key Deleted'));
     } else {
       log(chalk.red('API Key Could Not Be Deleted. API KEY NOT FOUND!'));

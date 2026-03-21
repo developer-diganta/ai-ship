@@ -14,12 +14,9 @@ import { buildCommitPrompt, buildCommitPromptGemma } from '../../utils/prompts';
 import { filterNoiseFiles } from '../../utils/parser';
 import { analyzeDiff } from '../../analyzers/analyzer';
 import { compressBranchSummary } from '../../analyzers/compressBranchSummary';
-import { generateWithGemma } from '../../ai/ollama';
-import { generateWithGemini } from '../../ai/gemini';
-import inquirer from 'inquirer';
-// @ts-ignore
-import { Input } from 'enquirer';
+import { generateAIResponse, getCommitPrompt, interactiveRefinePrompt } from '../../utils/ai';
 import ora from 'ora';
+import startCheckout from './startCheckout';
 
 let provider = getProvider();
 
@@ -61,17 +58,11 @@ export default async (flags: any = {}) => {
     console.log('');
 
     // 5️⃣ Analyze diff
-    const analyzeSpinner = ora('Analyzing changes and checking branches...').start();
+    const analyzeSpinner = ora('Analyzing file changes changes').start();
 
     const diffs = await getStagedDiff(filenames);
     const diffSummary = analyzeDiff(diffs);
-
-    await gitFetch();
-    await getAllBranches();
-    await getCurrentBranchName();
-
-    compressBranchSummary(diffSummary);
-
+    console.log({ diffSummary });
     analyzeSpinner.succeed('Analysis complete.\n');
 
     // 6️⃣ Commit message generation
@@ -81,24 +72,17 @@ export default async (flags: any = {}) => {
     while (!commitAccepted) {
       const commitSpinner = ora('Generating commit message...').start();
 
-      const prompt =
-        runProvider === 'local'
-          ? buildCommitPromptGemma(diffSummary)
-          : buildCommitPrompt(diffSummary);
+      const prompt = getCommitPrompt(runProvider, diffSummary);
+      commitMessage = await generateAIResponse(runProvider, prompt);
 
-      commitMessage =
-        runProvider === 'local'
-          ? await generateWithGemma(prompt)
-          : await generateWithGemini(prompt);
-
-      commitSpinner.succeed('Commit message generated:\n');
+      commitSpinner.succeed('Commit message generated:\\n');
 
       console.log(chalk.cyan(commitMessage));
       console.log('');
 
       // dry-run → exit early
       if (flags['dry-run']) {
-        console.log(chalk.yellow('Dry run enabled. Commit not executed.\n'));
+        console.log(chalk.yellow('Dry run enabled. Commit not executed.\\n'));
         await unstageFiles();
         return;
       }
@@ -109,38 +93,36 @@ export default async (flags: any = {}) => {
         break;
       }
 
-      const { action } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'action',
-          message: 'What would you like to do with this commit message?',
-          choices: ['Continue', 'Edit', 'Retry', 'Cancel'],
-        },
-      ]);
+      const result = await interactiveRefinePrompt('commit message', commitMessage);
+      if (result.cancel) return;
 
-      if (action === 'Continue') {
-        commitAccepted = true;
-      } else if (action === 'Edit') {
-        const promptInput = new Input({
-          message: 'Edit your commit message:',
-          initial: commitMessage,
-        });
-
-        commitMessage = (await promptInput.run()) as string;
-        commitAccepted = true;
-      } else if (action === 'Retry') {
-        console.log(chalk.yellow('Retrying commit message...\n'));
-      } else if (action === 'Cancel') {
-        console.log(chalk.yellow('Commit cancelled.\n'));
-        return;
-      }
+      commitAccepted = result.accepted;
+      commitMessage = result.value;
     }
 
     // 7️⃣ Commit
     const commitSpinner = ora('Committing changes...').start();
     await gitCommit(commitMessage);
     commitSpinner.succeed('Changes successfully committed!\n');
+    if (flags['new-branch']) {
+      const branchAnalyzeSpinner = ora('Checking branches...').start();
+      await gitFetch();
+      const allBranches = await getAllBranches();
+      const currentBranch = await getCurrentBranchName();
+
+      const branchSummary = compressBranchSummary(diffSummary);
+      branchAnalyzeSpinner.succeed('Analysis complete.\\n');
+      await startCheckout({
+        branchSummary,
+        allBranches,
+        currentBranch,
+        commitMessage,
+        provider: runProvider,
+        flags,
+      });
+    }
   } catch (err) {
+    console.log(err);
     if ((err as Error).name === 'ExitPromptError') {
       console.log(chalk.yellow('\nProcess aborted using user prompt.\n'));
       return;

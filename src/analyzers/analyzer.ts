@@ -50,63 +50,68 @@ const getFileType = (file: string) => {
 };
 
 export const analyzeDiff = (diff: string): DiffSummary[] => {
-  const files = diff.split('diff --git').filter(Boolean);
+  try {
+    const files = diff.split('diff --git').filter(Boolean);
 
-  const summaries: DiffSummary[] = [];
+    const summaries: DiffSummary[] = [];
 
-  for (const chunk of files) {
-    const lines = chunk.split('\n');
+    for (const chunk of files) {
+      const lines = chunk.split('\n');
 
-    const fileMatch = lines[0]?.match(/a\/(.+?) b\/(.+)/);
-    const file = fileMatch?.[2] || 'unknown';
+      const fileMatch = lines[0]?.match(/a\/(.+?) b\/(.+)/);
+      const file = fileMatch?.[2] || 'unknown';
 
-    const fileType = getFileType(file);
+      const fileType = getFileType(file);
 
-    if (fileType === 'markup') {
-      summaries.push(analyzeMarkup(file, lines));
-      continue;
-    }
-
-    if (fileType === 'config') {
-      summaries.push(analyzeConfig(file, lines));
-      continue;
-    }
-
-    // default = code analyzer
-    let additions = 0;
-    let deletions = 0;
-
-    const snippet: string[] = [];
-    const signals: string[] = [];
-
-    for (const line of lines) {
-      if (line.startsWith('+') && !line.startsWith('+++')) {
-        additions++;
-
-        const code = line.slice(1).trim();
-
-        if (snippet.length < 20) snippet.push(`+ ${code}`);
-
-        detectSignals(code, signals);
+      if (fileType === 'markup') {
+        summaries.push(analyzeMarkup(file, lines));
+        continue;
       }
 
-      if (line.startsWith('-') && !line.startsWith('---')) {
-        deletions++;
-
-        const code = line.slice(1).trim();
-
-        if (snippet.length < 20) snippet.push(`- ${code}`);
+      if (fileType === 'config') {
+        summaries.push(analyzeConfig(file, lines));
+        continue;
       }
+
+      // default = code analyzer
+      let additions = 0;
+      let deletions = 0;
+
+      const snippet: string[] = [];
+      const signals: string[] = [];
+
+      for (const line of lines) {
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          additions++;
+
+          const code = line.slice(1).trim();
+
+          if (snippet.length < 20) snippet.push(`+ ${code}`);
+
+          detectSignals(code, signals);
+        }
+
+        if (line.startsWith('-') && !line.startsWith('---')) {
+          deletions++;
+
+          const code = line.slice(1).trim();
+
+          if (snippet.length < 20) snippet.push(`- ${code}`);
+        }
+      }
+
+      summaries.push({
+        file,
+        additions,
+        deletions,
+        signals: [...new Set(signals)],
+        snippet,
+      });
     }
 
-    summaries.push({
-      file,
-      additions,
-      deletions,
-      signals: [...new Set(signals)],
-      snippet,
-    });
+    return summaries;
+  } catch (e) {
+    console.log({ e });
+    return [];
   }
-
-  return summaries;
 };
