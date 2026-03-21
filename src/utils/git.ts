@@ -87,6 +87,22 @@ export const gitRenameBranch = async (branchName: string) => {
   await asyncExecuter(`git branch -m "${branchName}"`);
 };
 
+export const gitCheckoutNewBranch = async (branchName: string) => {
+  await asyncExecuter(`git checkout -b ${branchName}`);
+};
+
 export const unstageFiles = async () => {
   await asyncExecuter(`git reset`);
+};
+
+export const push = async () => {
+  try {
+    await asyncExecuter(`git push`);
+  } catch {
+    const { stdout } = await asyncExecuter(`git rev-parse --abbrev-ref HEAD`);
+
+    const branchName = stdout.trim();
+
+    await asyncExecuter(`git push --set-upstream origin ${branchName}`);
+  }
 };
