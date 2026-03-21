@@ -1,5 +1,5 @@
 import ora from 'ora';
-import startCommit from './git/startCommit';
+import startWorkflow from './git/startWorkflow';
 import { stageAll, stageFiles } from '../utils/git';
 
 export default async (payload: string[] = [], flags: any = {}) => {
@@ -14,5 +14,5 @@ export default async (payload: string[] = [], flags: any = {}) => {
 
   console.log('');
 
-  await startCommit(flags);
+  await startWorkflow(flags);
 };

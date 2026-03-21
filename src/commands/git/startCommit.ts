@@ -1,22 +1,12 @@
 import chalk from 'chalk';
 import { getProvider, log } from '../../utils/helper';
-import {
-  getAllBranches,
-  getCurrentBranchName,
-  getFilesChanged,
-  getStagedDiff,
-  gitFetch,
-  gitCommit,
-  unstageFiles,
-} from '../../utils/git';
+import { getFilesChanged, getStagedDiff, gitCommit, unstageFiles } from '../../utils/git';
 import { expandDirectories } from '../../utils/files';
-import { buildCommitPrompt, buildCommitPromptGemma } from '../../utils/prompts';
 import { filterNoiseFiles } from '../../utils/parser';
 import { analyzeDiff } from '../../analyzers/analyzer';
-import { compressBranchSummary } from '../../analyzers/compressBranchSummary';
-import { generateAIResponse, getCommitPrompt, interactiveRefinePrompt } from '../../utils/ai';
+import { generateAIResponse, getCommitPrompt } from '../../utils/ai';
+import { interactiveRefinePrompt } from '../../utils/inquirer';
 import ora from 'ora';
-import startCheckout from './startCheckout';
 
 let provider = getProvider();
 
@@ -62,7 +52,6 @@ export default async (flags: any = {}) => {
 
     const diffs = await getStagedDiff(filenames);
     const diffSummary = analyzeDiff(diffs);
-    console.log({ diffSummary });
     analyzeSpinner.succeed('Analysis complete.\n');
 
     // 6️⃣ Commit message generation
@@ -104,23 +93,7 @@ export default async (flags: any = {}) => {
     const commitSpinner = ora('Committing changes...').start();
     await gitCommit(commitMessage);
     commitSpinner.succeed('Changes successfully committed!\n');
-    if (flags['new-branch']) {
-      const branchAnalyzeSpinner = ora('Checking branches...').start();
-      await gitFetch();
-      const allBranches = await getAllBranches();
-      const currentBranch = await getCurrentBranchName();
-
-      const branchSummary = compressBranchSummary(diffSummary);
-      branchAnalyzeSpinner.succeed('Analysis complete.\\n');
-      await startCheckout({
-        branchSummary,
-        allBranches,
-        currentBranch,
-        commitMessage,
-        provider: runProvider,
-        flags,
-      });
-    }
+    return { commitMessage, diffSummary, runProvider };
   } catch (err) {
     console.log(err);
     if ((err as Error).name === 'ExitPromptError') {

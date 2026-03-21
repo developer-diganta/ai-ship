@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import ora from 'ora';
-import { generateAIResponse, getBranchPrompt, interactiveRefinePrompt } from '../../utils/ai';
-import { gitRenameBranch } from '../../utils/git';
+import { generateAIResponse, getBranchPrompt } from '../../utils/ai';
+import { interactiveRefinePrompt } from '../../utils/inquirer';
+import { gitCheckoutNewBranch, gitRenameBranch } from '../../utils/git';
 
 type BranchParams = {
   branchSummary: any[];
@@ -90,7 +91,7 @@ export default async ({
 
   const branchProcessSpinner = ora('Applying branch name...').start();
 
-  await gitRenameBranch(branchName);
+  await gitCheckoutNewBranch(branchName);
 
-  branchProcessSpinner.succeed(`Branch correctly renamed to ${chalk.bold(branchName)}!`);
+  branchProcessSpinner.succeed(`Checked out to ${chalk.bold(branchName)}!`);
 };
