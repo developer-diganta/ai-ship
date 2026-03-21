@@ -9,6 +9,11 @@ export type AIGenerationResult = {
   cancel: boolean;
 };
 
+export type pushPromptResult = {
+  accepted: boolean;
+  cancel: boolean;
+};
+
 export const interactiveRefinePrompt = async (
   itemType: string,
   initialValue: string,
@@ -47,26 +52,20 @@ export const interactiveRefinePrompt = async (
   return { accepted: false, value: initialValue, cancel: true };
 };
 
-export const interactivePushPrompt = async (
-  itemType: string,
-  initialValue: string,
-): Promise<AIGenerationResult> => {
+export const interactivePushPrompt = async (): Promise<pushPromptResult> => {
   const { action } = await inquirer.prompt([
     {
       type: 'list',
       name: 'action',
-      message: `What would you like to do with this ${itemType}?`,
-      choices: ['Push', 'Cancel'],
+      message: `Do you want to push your committed changes to the remote repository?`,
+      choices: ['Yes', 'No'],
     },
   ]);
 
-  if (action === 'Continue') {
-    return { accepted: true, value: initialValue, cancel: false };
+  if (action === 'Yes') {
+    return { accepted: true, cancel: false };
   }
 
-  // Cancel
-  console.log(
-    chalk.yellow(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} cancelled.\\n`),
-  );
-  return { accepted: false, value: initialValue, cancel: true };
+  console.log(chalk.yellow(`Push cancelled\n`));
+  return { accepted: false, cancel: true };
 };

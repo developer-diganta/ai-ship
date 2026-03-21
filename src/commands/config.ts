@@ -14,7 +14,6 @@ export default async (args: ParsedArgs) => {
   // `args` now contains elegantly parsed flags from minimist!
   // Example: `--model --local connection.json` becomes `{ model: true, local: 'connection.json' }`
   // Example: `--user-model local` becomes `{ 'user-model': 'local' }`
-  // console.log('args');
   const subCommand = args._[0];
   if (subCommand === 'show') {
     const currenConfigs = getCurrentConfig();

@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import startCommit from './startCommit';
 import startCheckout from './startCheckout';
-import { gitPush } from './startPush';
+import { gitDirectPush, gitInteractivePush } from './startPush';
 import { log } from '../../utils/helper';
 import { getAllBranches, getCurrentBranchName, gitFetch } from '../../utils/git';
 import { compressBranchSummary } from '../../analyzers/compressBranchSummary';
@@ -38,7 +38,9 @@ export default async (flags: any = {}) => {
     }
 
     if (flags['push']) {
-      await gitPush();
+      await gitDirectPush();
+    } else {
+      await gitInteractivePush();
     }
   } catch (err) {
     console.log(err);
