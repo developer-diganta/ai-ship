@@ -72,7 +72,9 @@ export default async (flags: any = {}) => {
       // dry-run → exit early
       if (flags['dry-run']) {
         console.log(chalk.yellow('Dry run enabled. Commit not executed.\\n'));
+        const unstageSpinner = ora('Unstaging files...').start();
         await unstageFiles();
+        unstageSpinner.succeed('Files unstaged.');
         return;
       }
 
