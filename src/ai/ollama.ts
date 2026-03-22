@@ -22,9 +22,17 @@ export const generateWithGemma = async (prompt: string) => {
     });
 
     const data = await res.json();
-    return data.response.trim();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || `HTTP error! status: ${res.status}`);
+    }
+
+    if (data.response) {
+      return data.response.trim();
+    }
+
+    throw new Error('Unexpected response format from local model');
   } catch (e) {
-    console.error(chalk.red(`Failed to connect to local model: ${e}`));
-    return '';
+    throw new Error(`Failed to connect to local model: ${(e as Error).message}`);
   }
 };
