@@ -29,6 +29,8 @@ const startCommandExecution = async () => {
       await runConfig(subArgs);
       break;
 
+    // case 'pr':
+    //   await run
     default:
       console.log('Unknown command');
   }
