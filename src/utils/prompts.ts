@@ -187,3 +187,48 @@ docs/update-readme
 Return ONLY the branch name.
 `;
 };
+
+export const pRPrompt = ({
+  commitMessage,
+  branchName,
+  summary,
+}: {
+  commitMessage: string;
+  branchName: string;
+  summary: any;
+}) => {
+  return `
+You are an expert software engineer.
+
+Based on the following code changes, generate a high-quality pull request.
+
+Inputs:
+- Commit message: ${commitMessage}
+- Branch name: ${branchName}
+- File changes:
+${JSON.stringify(summary, null, 2)}
+
+Instructions:
+- Write a clear and concise PR title
+- Write a structured PR description
+- Do NOT include unnecessary explanations
+- Do NOT repeat the same information
+- Keep it professional and minimal
+- Keep total description under 120 words
+
+Output format:
+
+TITLE:
+<one-line PR title>
+
+DESCRIPTION:
+## Summary
+<what this PR does>
+
+## Changes
+<bullet list of key changes>
+
+## Notes
+<optional, only if needed>
+`;
+};

@@ -6,6 +6,7 @@ import { gitDirectPush, gitInteractivePush } from './startPush';
 import { log } from '../../utils/helper';
 import { getAllBranches, getCurrentBranchName, gitFetch } from '../../utils/git';
 import { compressBranchSummary } from '../../analyzers/compressBranchSummary';
+import { startPR } from './startPR';
 
 export default async (flags: any = {}) => {
   try {
@@ -42,6 +43,14 @@ export default async (flags: any = {}) => {
     } else {
       await gitInteractivePush();
     }
+
+    // if (flags['pr']) {
+    await startPR({
+      diffSummary,
+      commitMessage,
+      provider: runProvider,
+    });
+    // }
   } catch (err) {
     console.log(err);
     log(chalk.red(`Workflow encountered an error: ${err}`));
