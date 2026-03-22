@@ -47,7 +47,7 @@ export const startPR = async ({
 
     const targetBranch = flags['target-branch'] || flags['base'] || 'main';
 
-    await createPR({
+    const prResult = await createPR({
       title,
       body,
       head: branchName,
@@ -55,6 +55,10 @@ export const startPR = async ({
     });
 
     createSpinner.succeed(chalk.green('PR created successfully!\n'));
+
+    if (prResult.stdout && prResult.stdout.trim()) {
+      console.log(chalk.blue(`🔗 PR Link: ${prResult.stdout.trim()}\n`));
+    }
   } catch (err) {
     console.log(err);
     log(chalk.red(`PR generation failed: ${err}`));
