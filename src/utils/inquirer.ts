@@ -69,3 +69,31 @@ export const interactivePushPrompt = async (): Promise<pushPromptResult> => {
   console.log(chalk.yellow(`Push cancelled\n`));
   return { accepted: false, cancel: true };
 };
+
+export const interactivePRPrompt = async (
+  defaultBase: string = 'main',
+): Promise<{ accepted: boolean; cancel: boolean; base: string }> => {
+  const { action } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'action',
+      message: `Do you want to create a pull request?`,
+      choices: ['Yes', 'No'],
+    },
+  ]);
+
+  if (action === 'Yes') {
+    const { base } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'base',
+        message: `Which branch do you want to target?`,
+        default: defaultBase,
+      },
+    ]);
+    return { accepted: true, cancel: false, base };
+  }
+
+  console.log(chalk.yellow(`PR creation cancelled\n`));
+  return { accepted: false, cancel: true, base: defaultBase };
+};

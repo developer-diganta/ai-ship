@@ -7,6 +7,7 @@ import { log } from '../../utils/helper';
 import { getAllBranches, getCurrentBranchName, gitFetch } from '../../utils/git';
 import { compressBranchSummary } from '../../analyzers/compressBranchSummary';
 import { startPR } from './startPR';
+import { interactivePRPrompt } from '../../utils/inquirer';
 
 export default async (flags: any = {}) => {
   try {
@@ -44,13 +45,25 @@ export default async (flags: any = {}) => {
       await gitInteractivePush();
     }
 
-    // if (flags['pr']) {
-    await startPR({
-      diffSummary,
-      commitMessage,
-      provider: runProvider,
-    });
-    // }
+    if (flags['pr']) {
+      await startPR({
+        diffSummary,
+        commitMessage,
+        provider: runProvider,
+        flags,
+      });
+    } else {
+      const prPromptResult = await interactivePRPrompt(flags['target-branch'] || 'main');
+      if (prPromptResult.accepted) {
+        flags['target-branch'] = prPromptResult.base;
+        await startPR({
+          diffSummary,
+          commitMessage,
+          provider: runProvider,
+          flags,
+        });
+      }
+    }
   } catch (err) {
     console.log(err);
     log(chalk.red(`Workflow encountered an error: ${err}`));
