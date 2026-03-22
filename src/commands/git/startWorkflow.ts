@@ -44,13 +44,13 @@ export default async (flags: any = {}) => {
       await gitInteractivePush();
     }
 
-    if (flags['pr']) {
-      await startPR({
-        diffSummary,
-        commitMessage,
-        provider: runProvider,
-      });
-    }
+    // if (flags['pr']) {
+    await startPR({
+      diffSummary,
+      commitMessage,
+      provider: runProvider,
+    });
+    // }
   } catch (err) {
     console.log(err);
     log(chalk.red(`Workflow encountered an error: ${err}`));
