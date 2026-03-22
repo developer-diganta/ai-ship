@@ -10,10 +10,12 @@ export const startPR = async ({
   diffSummary,
   commitMessage,
   provider,
+  flags,
 }: {
   diffSummary: any;
   commitMessage: string;
   provider: any;
+  flags: any;
 }) => {
   try {
     const spinner = ora('Generating PR...').start();
@@ -43,10 +45,13 @@ export const startPR = async ({
 
     const createSpinner = ora('Creating PR...').start();
 
+    const targetBranch = flags['target-branch'] || flags['base'] || 'main';
+
     await createPR({
       title,
       body,
       head: branchName,
+      base: targetBranch,
     });
 
     createSpinner.succeed(chalk.green('PR created successfully!\n'));
