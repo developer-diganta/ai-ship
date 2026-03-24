@@ -16,8 +16,11 @@ export const generateWithGemma = async (prompt: string) => {
         prompt,
         stream: false,
         options: {
-          temperature: 0.1,
+          temperature: 0.7,
+          top_p: 0.9,
+          repeat_penalty: 1.2,
         },
+        stop: ['\n\n', 'Output:', 'Commit:'],
       }),
     });
 
