@@ -106,3 +106,15 @@ export const push = async () => {
     await asyncExecuter(`git push --set-upstream origin ${branchName}`);
   }
 };
+
+export const diffAgainstBranch = async (branch: string) => {
+  const { stdout } = await asyncExecuter(`git diff ${branch}...HEAD`);
+  return stdout;
+};
+
+export const commitHistoryAgainstBranch = async (branch: string) => {
+  const { stdout } = await asyncExecuter(`git log ${branch}...HEAD --oneline`);
+  return stdout;
+};
+
+const fetchOrigin = async () => await asyncExecuter('git fetch origin');

@@ -1,4 +1,7 @@
-export const buildCommitPrompt = (summary: any[]) => {
+export const buildCommitPrompt = (
+  summary: any[],
+  intent: { type: string; description: string },
+) => {
   const formatted = summary
     .map(
       (s) => `
@@ -13,12 +16,22 @@ ${s.snippet.join('\n')}
     .join('\n');
 
   return `
+You are a senior software engineer.
+
+Detected intent:
+Type: ${intent.type}
+Description: ${intent.description}
+
 Generate a conventional commit message.
 
 Rules:
 - one line
 - under 72 characters
-- conventional commit format
+- format: <type>: <message>
+- use the detected type unless clearly wrong
+- be specific (mention actual feature/file if possible)
+- DO NOT hallucinate
+- no markdown, no quotes
 
 Changes:
 ${formatted}
@@ -86,48 +99,37 @@ docs/update-readme
 `;
 };
 
-export const buildCommitPromptGemma = (summary: any[]) => {
-  const formatted = summary
-    .map(
-      (s) => `
-File: ${s.file}
-Additions: ${s.additions}
-Deletions: ${s.deletions}
-Signals: ${s.signals.join(', ')}
-`,
-    )
-    .join('\n');
+export const buildCommitPromptGemma = (
+  summary: any[],
+  intent: { type: string; description: string },
+) => {
+  const files = summary.map((s) => s.file).join(', ');
+
+  const keySignals = summary
+    .flatMap((s) => s.signals)
+    .slice(0, 5)
+    .join(', ');
 
   return `
-You generate git commit messages.
+Write a git commit message.
 
-Task:
-Write a Conventional Commit message describing the changes.
+Type: ${intent.type}
+Description: ${intent.description}
+
+Files: ${files}
+Changes: ${keySignals}
 
 Rules:
 - one line only
-- under 72 characters
-- imperative tense
-- lowercase commit type
-- no explanation
-- no additional text
+- format: <type>: <message>
+- MUST use given type
+- mention specific file or function if possible
+- do NOT repeat previous answers
 
-Format:
-type: message
-
-Examples:
-feat: add commit generation using AI
-fix: correct git diff parsing
-refactor: simplify diff analyzer logic
-chore: update dependencies
-
-Changes:
-${formatted}
-
-Output exactly one line like:
-feat: add ollama integration
+Output:
 `;
 };
+
 export const buildBranchPromptGemma = (
   summary: BranchSummary[],
   existingBranches: string[],
@@ -144,6 +146,7 @@ export const buildBranchPromptGemma = (
   const branchList = existingBranches.slice(0, 30).join('\n');
 
   return `
+  Context ID: ${Date.now()}
 You generate git branch names.
 
 Goal:
