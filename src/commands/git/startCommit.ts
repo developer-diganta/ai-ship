@@ -7,6 +7,7 @@ import { analyzeDiff } from '../../analyzers/analyzer';
 import { generateAIResponse, getCommitPrompt } from '../../utils/ai';
 import { interactiveRefinePrompt } from '../../utils/inquirer';
 import ora from 'ora';
+import { buildIntent } from '../../analyzers/buildIntent';
 
 let provider = getProvider();
 
@@ -52,6 +53,7 @@ export default async (flags: any = {}) => {
 
     const diffs = await getStagedDiff(filenames);
     const diffSummary = analyzeDiff(diffs);
+    const intent = buildIntent(diffSummary);
     analyzeSpinner.succeed('Analysis complete.\n');
 
     // 6️⃣ Commit message generation
@@ -61,8 +63,8 @@ export default async (flags: any = {}) => {
     while (!commitAccepted) {
       const commitSpinner = ora('Generating commit message...').start();
 
-      const prompt = getCommitPrompt(runProvider, diffSummary);
-      commitMessage = await generateAIResponse(runProvider, prompt);
+      const prompt = getCommitPrompt(runProvider, diffSummary, intent);
+        commitMessage = await generateAIResponse(runProvider, prompt, intent);
 
       commitSpinner.succeed('Commit message generated:\\n');
 

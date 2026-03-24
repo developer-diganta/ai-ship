@@ -4,6 +4,7 @@ import minimist from 'minimist';
 import runConfig from './commands/config';
 import runCommit from './commands/commit';
 import chalk from 'chalk';
+import { startReview } from './commands/git/startReview';
 
 const startCommandExecution = async () => {
   const args = minimist(process.argv.slice(2));
@@ -14,26 +15,33 @@ const startCommandExecution = async () => {
     ...args,
     _: args._.slice(1),
   };
+
   console.log('');
-  console.log(chalk.bold.bgBlue(' 🚀 AI-SHIP ') + chalk.bold.blue(' Commit Generator '));
+  console.log(chalk.bold.bgBlue(' 🚀 AI-SHIP ') + chalk.bold.blue(' Git Intelligence CLI '));
   console.log(chalk.dim('==================================='));
   console.log('');
 
   switch (command) {
-    case 'commit':
+    case 'commit': {
       const { _, ...flags } = subArgs;
       await runCommit(_, flags);
       break;
+    }
 
-    case 'config':
+    case 'review': {
+      await startReview(subArgs); // 👈 here
+      break;
+    }
+
+    case 'config': {
       await runConfig(subArgs);
       break;
+    }
 
-    // case 'pr':
-    //   await run
     default:
-      console.log('Unknown command');
+      console.log(chalk.red('Unknown command'));
   }
+
   console.log('');
 };
 
