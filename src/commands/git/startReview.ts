@@ -60,7 +60,6 @@ const KEYWORDS = [
 ];
 
 export const processDiff = (rawDiff: string): FilePatch[] => {
-  console.log('RAW DIFF:', rawDiff.slice(0, 500));
   const files = rawDiff.split('diff --git').filter(Boolean);
   const results: FilePatch[] = [];
 
@@ -231,7 +230,6 @@ export const startReview = async (flags: any = {}) => {
     const commits = rawCommits.trim().split('\n').filter(Boolean);
 
     const processed = processDiff(rawDiff);
-    console.log('PROCESSED:', JSON.stringify(processed, null, 2));
     const runProvider = await getProvider();
     let allResults: ReviewItem[] = [];
 
