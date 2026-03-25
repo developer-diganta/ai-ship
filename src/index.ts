@@ -5,6 +5,8 @@ import runConfig from './commands/config';
 import runCommit from './commands/commit';
 import chalk from 'chalk';
 import { startReview } from './commands/git/startReview';
+import { detectRemoteHost } from './utils/helper';
+import { createGitlabMR } from './commands/gitlab/gitlab';
 
 const startCommandExecution = async () => {
   const args = minimist(process.argv.slice(2));
@@ -46,3 +48,4 @@ const startCommandExecution = async () => {
 };
 
 startCommandExecution();
+// (async () => console.log(await createGitlabMR()))();
