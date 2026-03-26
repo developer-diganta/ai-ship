@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import { log } from 'node:console';
-import ora from 'ora';
+import { ui } from '../../utils/ui';
 import fs from 'fs';
 import path from 'path';
 import open from 'open';
@@ -17,18 +16,18 @@ export const startReview = async (flags: any = {}) => {
   try {
     const base = flags._?.[0];
     if (!base) {
-      log(chalk.yellow('Please provide base branch'));
+      ui.warn('Please provide base branch');
       return;
     }
 
-    const spinner = ora('Preparing review...').start();
+    const spinner = ui.spinner('Preparing review...');
 
     await gitFetch();
 
     const rawDiff = await diffAgainstBranch(base);
     if (!rawDiff.trim()) {
       spinner.stop();
-      log(chalk.yellow('No changes to review'));
+      ui.warn('No changes to review');
       return;
     }
 
@@ -58,11 +57,10 @@ export const startReview = async (flags: any = {}) => {
 
     fs.writeFileSync(filePath, html);
 
-    log(chalk.green('\n📄 Opening review in browser...\n'));
+    ui.success('Opening review in browser...\n');
 
     await open(filePath);
   } catch (err: any) {
-    console.log(err);
-    log(chalk.red(`Review failed: ${err?.message || err}`));
+    ui.error(`Review failed: ${err?.message || err}`);
   }
 };

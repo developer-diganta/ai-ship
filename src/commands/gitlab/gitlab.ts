@@ -2,11 +2,19 @@ import axios from 'axios';
 import { fetchGitRemoteOriginURL } from '../../utils/git';
 import { extractBaseUrl, extractProjectPath, getGitLabToken } from '../../utils/helper';
 
-export const createGitlabMR = async () => {
+export const createGitlabMR = async ({
+  title,
+  description,
+  sourceBranch,
+  targetBranch,
+}: {
+  title: string;
+  description: string;
+  sourceBranch: string;
+  targetBranch: string;
+}) => {
   const { stdout: remoteUrl } = await fetchGitRemoteOriginURL();
-  console.log({ remoteUrl });
   const projectPath = extractProjectPath(remoteUrl) || '';
-  console.log({ projectPath });
   const encodedProject = encodeURIComponent(projectPath);
   const baseUrl = extractBaseUrl(remoteUrl) || '';
   const url = `${baseUrl}/api/v4/projects/${encodedProject}/merge_requests`;
@@ -14,10 +22,10 @@ export const createGitlabMR = async () => {
   const res = await axios.post(
     url,
     {
-      source_branch: 'test',
-      target_branch: 'main',
-      title: 'Test MR from AI-SHIP',
-      description: 'Test MR from AI-SHIP',
+      source_branch: sourceBranch,
+      target_branch: targetBranch,
+      title: title,
+      description: description,
     },
     {
       headers: {

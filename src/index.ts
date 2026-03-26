@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import { startReview } from './commands/git/startReview';
 import { detectRemoteHost } from './utils/helper';
 import { createGitlabMR } from './commands/gitlab/gitlab';
-
+import { ui } from './utils/ui';
 const startCommandExecution = async () => {
   const args = minimist(process.argv.slice(2));
 
@@ -18,10 +18,7 @@ const startCommandExecution = async () => {
     _: args._.slice(1),
   };
 
-  console.log('');
-  console.log(chalk.bold.bgBlue(' 🚀 AI-SHIP ') + chalk.bold.blue(' Git Intelligence CLI '));
-  console.log(chalk.dim('==================================='));
-  console.log('');
+  ui.header('🚀 AI-SHIP', 'Git Intelligence CLI');
 
   switch (command) {
     case 'commit': {
@@ -41,10 +38,10 @@ const startCommandExecution = async () => {
     }
 
     default:
-      console.log(chalk.red('Unknown command'));
+      ui.error('Unknown command');
   }
 
-  console.log('');
+  ui.newline();
 };
 
 startCommandExecution();

@@ -1,10 +1,11 @@
-import ora from 'ora';
 import chalk from 'chalk';
+import { ui } from '../../utils/ui';
 import { pRPrompt } from '../../utils/prompts';
 import { getCurrentBranchName } from '../../utils/git';
 import { createPR } from '../github/github';
-import { log } from '../../utils/helper';
+import { detectRemoteHost, log } from '../../utils/helper';
 import { generateAIResponse } from '../../utils/ai';
+import { createGitlabMR } from '../gitlab/gitlab';
 
 export const startPR = async ({
   diffSummary,
@@ -18,7 +19,7 @@ export const startPR = async ({
   flags: any;
 }) => {
   try {
-    const spinner = ora('Generating PR...').start();
+    const spinner = ui.spinner('Generating PR...');
 
     const branchName = await getCurrentBranchName();
 
@@ -43,24 +44,41 @@ export const startPR = async ({
     const title = titleMatch[1].trim();
     const body = descriptionMatch[1].trim();
 
-    const createSpinner = ora('Creating PR...').start();
+    const createSpinner = ui.spinner('Creating PR...');
 
     const targetBranch = flags['target-branch'] || flags['base'] || 'main';
 
-    const prResult = await createPR({
-      title,
-      body,
-      head: branchName,
-      base: targetBranch,
-    });
+    let prResult: any = null;
+    let prLink = '';
+    const remoteHost = await detectRemoteHost();
 
-    createSpinner.succeed(chalk.green('PR created successfully!\n'));
+    if (remoteHost === 'github') {
+      prResult = await createPR({
+        title,
+        body,
+        head: branchName,
+        base: targetBranch,
+      });
+      prLink = prResult.stdout?.trim() || '';
+      createSpinner.succeed('GitHub PR created successfully!\n');
+    } else if (remoteHost === 'gitlab') {
+      prResult = await createGitlabMR({
+        title,
+        description: body,
+        sourceBranch: branchName,
+        targetBranch,
+      });
+      prLink = prResult.web_url || '';
+      createSpinner.succeed('GitLab MR created successfully!\n');
+    } else {
+      createSpinner.fail('Remote Host Not Found. PR creation failed.\n');
+      return;
+    }
 
-    if (prResult.stdout && prResult.stdout.trim()) {
-      console.log(chalk.blue(`🔗 PR Link: ${prResult.stdout.trim()}\n`));
+    if (prLink) {
+      ui.info(`🔗 PR Link: ${prLink}\n`);
     }
   } catch (err) {
-    console.log(err);
-    log(chalk.red(`PR generation failed: ${err}`));
+    ui.error(`PR generation failed: ${err}`);
   }
 };

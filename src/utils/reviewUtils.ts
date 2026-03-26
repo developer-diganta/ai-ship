@@ -145,7 +145,7 @@ ${Object.entries(grouped)
 ${items.map((i) => `<li class="${i.severity}">[${i.severity}] ${i.message}</li>`).join('')}
 </ul>
 </div>
-`
+`,
   )
   .join('')}
 

@@ -2,6 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
+import { ui } from './ui';
 import { fetchGitRemoteOriginURL } from './git';
 type AIShipConfig = {
   provider: 'local' | 'cloud';
@@ -21,7 +22,7 @@ const ALLOWED_KEYS = [
   'gitlab.token',
 ];
 
-export const log = (data: any) => console.log(data);
+export const log = (data: any) => ui.log(data);
 
 // config dir for storing api key
 export const CONFIG_DIR = path.join(os.homedir(), '.ai-ship');
@@ -65,27 +66,27 @@ export const verboseConfig = (config: any) => {
     ? gitlabToken.slice(0, 4) + '...' + gitlabToken.slice(-4)
     : 'not configured';
 
-  console.log(chalk.bold('\nAI-Ship Configuration\n'));
+  ui.header('AI-Ship Configuration');
 
-  console.log(chalk.yellow('Provider'));
-  console.log('  Current:', provider || 'not set');
-  console.log('  Description: Determines where AI runs (local via Ollama or cloud API)\n');
+  ui.log(chalk.yellow('Provider'));
+  ui.log(`  Current: ${provider || 'not set'}`);
+  ui.log('  Description: Determines where AI runs (local via Ollama or cloud API)\n');
 
-  console.log(chalk.yellow('Model'));
-  console.log('  Current:', model || 'not set');
-  console.log('  Description: AI model used for commit and branch generation\n');
+  ui.log(chalk.yellow('Model'));
+  ui.log(`  Current: ${model || 'not set'}`);
+  ui.log('  Description: AI model used for commit and branch generation\n');
 
-  console.log(chalk.yellow('Local Model Settings'));
-  console.log('  Endpoint:', localEndpoint || 'not configured');
-  console.log('  Description: URL of the local model server (e.g. http://127.0.0.1:11434)\n');
+  ui.log(chalk.yellow('Local Model Settings'));
+  ui.log(`  Endpoint: ${localEndpoint || 'not configured'}`);
+  ui.log('  Description: URL of the local model server (e.g. http://127.0.0.1:11434)\n');
 
-  console.log(chalk.yellow('Cloud Model Settings'));
-  console.log('  Gemini API Key:', maskedKey);
-  console.log('  Description: API key used when provider is set to cloud\n');
+  ui.log(chalk.yellow('Cloud Model Settings'));
+  ui.log(`  Gemini API Key: ${maskedKey}`);
+  ui.log('  Description: API key used when provider is set to cloud\n');
 
-  console.log(chalk.yellow('GitLab Settings'));
-  console.log('  Base URL:', gitlabBaseUrl || 'not configured');
-  console.log('  Token:', maskedGitlabToken);
+  ui.log(chalk.yellow('GitLab Settings'));
+  ui.log(`  Base URL: ${gitlabBaseUrl || 'not configured'}`);
+  ui.log(`  Token: ${maskedGitlabToken}`);
 };
 
 export const jsonConfig = (config: any) => {
@@ -101,7 +102,7 @@ export const jsonConfig = (config: any) => {
     'gitlab.token': gitlabToken ? gitlabToken.slice(0, 4) + '...' + gitlabToken.slice(-4) : null,
   };
 
-  console.log(JSON.stringify(safeConfig, null, 2));
+  ui.log(JSON.stringify(safeConfig, null, 2));
 };
 
 const validateValue = (key: string, value: string) => {
@@ -171,9 +172,9 @@ export const saveValueToConfig = (key: string, value: string) => {
 
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 
-    console.log(chalk.green(`✔ Config updated: ${chalk.bold.green(key)}`));
+    ui.success(`Config updated: ${chalk.bold(key)}`);
   } catch (err: any) {
-    console.error(chalk.red(`❌ Failed to save config: ${chalk.bold.red(err.message)}`));
+    ui.error(`Failed to save config: ${chalk.bold(err.message)}`);
   }
 };
 
