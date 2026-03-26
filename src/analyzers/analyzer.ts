@@ -111,7 +111,7 @@ export const analyzeDiff = (diff: string): DiffSummary[] => {
 
     return summaries;
   } catch (e) {
-    console.log({ e });
+    // ui.error('Failed to analyze diff');
     return [];
   }
 };

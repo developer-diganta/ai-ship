@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { ui } from '../utils/ui';
 import {
   deleteConfigKey,
   getCurrentConfig,
@@ -30,7 +30,7 @@ export default async (args: ParsedArgs) => {
     const value = args._[2];
 
     if (!key || !value) {
-      console.log('Usage: ai-ship config set <key> <value>');
+      ui.info('Usage: ai-ship config set <key> <value>');
       return;
     }
 
@@ -42,32 +42,32 @@ export default async (args: ParsedArgs) => {
     const key = args._[1];
 
     if (!key) {
-      console.log(chalk.yellow('Usage: ai-ship config get <key>'));
+      ui.warn('Usage: ai-ship config get <key>');
       return;
     }
 
     const configValue = getCurrentConfig(key);
 
     if (configValue === undefined || configValue === null || configValue === '') {
-      console.log(chalk.red(`Config "${key}" not found.`));
+      ui.error(`Config "${key}" not found.`);
       return;
     }
 
-    console.log(`${chalk.cyan(key)}: ${chalk.green(JSON.stringify(configValue, null, 2))}`);
+    ui.success(`${key}: ${JSON.stringify(configValue, null, 2)}`);
     return;
   }
   if (args['add-key']) {
     const apiKey = await askApiKey();
     saveValueToConfig('geminiApiKey', apiKey);
-    log('API key saved!');
+    ui.success('API key saved!');
   } else if (args['delete-key']) {
     if (deleteConfigKey('geminiApiKey')) {
-      log(chalk.green('API Key Deleted'));
+      ui.success('API Key Deleted');
     } else {
-      log(chalk.red('API Key Could Not Be Deleted. API KEY NOT FOUND!'));
+      ui.error('API Key Could Not Be Deleted. API KEY NOT FOUND!');
     }
   } else {
-    log(chalk.yellow('Unrecognized config option. Here are the extracted args for your logic:'));
-    console.log(args);
+    ui.warn('Unrecognized config option. Here are the extracted args for your logic:');
+    ui.log(JSON.stringify(args, null, 2));
   }
 };

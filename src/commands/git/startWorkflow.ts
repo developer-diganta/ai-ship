@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import { ui } from '../../utils/ui';
 import startCommit from './startCommit';
 import startCheckout from './startCheckout';
 import { gitDirectPush, gitInteractivePush } from './startPush';
@@ -21,7 +21,7 @@ export default async (flags: any = {}) => {
     const { diffSummary, commitMessage, runProvider } = commitResult;
 
     if (flags['new-branch']) {
-      const branchAnalyzeSpinner = ora('Checking branches...').start();
+      const branchAnalyzeSpinner = ui.spinner('Checking branches...');
       await gitFetch();
       const allBranches = await getAllBranches();
       const currentBranch = await getCurrentBranchName();
@@ -39,10 +39,15 @@ export default async (flags: any = {}) => {
       });
     }
 
+    let pushed = false;
     if (flags['push']) {
-      await gitDirectPush();
+      pushed = await gitDirectPush();
     } else {
-      await gitInteractivePush();
+      pushed = await gitInteractivePush();
+    }
+
+    if (!pushed) {
+      return;
     }
 
     if (flags['pr']) {
@@ -65,7 +70,6 @@ export default async (flags: any = {}) => {
       }
     }
   } catch (err) {
-    console.log(err);
-    log(chalk.red(`Workflow encountered an error: ${err}`));
+    ui.error(`Workflow encountered an error: ${err}`);
   }
 };

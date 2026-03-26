@@ -1,6 +1,6 @@
 {
   "name": "ai-ship-cli",
-  "version": "0.1.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "AI-powered Git workflow CLI (commit, branch, PR generation)",
   "main": "dist/index.js",
   "bin": {
@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.44.0",
+    "axios": "^1.13.6",
     "chalk": "^4.1.2",
     "dotenv": "^17.3.1",
     "enquirer": "^2.4.1",

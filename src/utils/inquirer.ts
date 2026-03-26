@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 // @ts-ignore
 import { Input } from 'enquirer';
-import chalk from 'chalk';
+import { ui } from './ui';
 
 export type AIGenerationResult = {
   accepted: boolean;
@@ -41,14 +41,12 @@ export const interactiveRefinePrompt = async (
   }
 
   if (action === 'Retry') {
-    console.log(chalk.yellow(`Retrying ${itemType}...\\n`));
+    ui.warn(`Retrying ${itemType}...\\n`);
     return { accepted: false, value: initialValue, cancel: false };
   }
 
   // Cancel
-  console.log(
-    chalk.yellow(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} cancelled.\\n`),
-  );
+  ui.warn(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} cancelled.\\n`);
   return { accepted: false, value: initialValue, cancel: true };
 };
 
@@ -66,7 +64,7 @@ export const interactivePushPrompt = async (): Promise<pushPromptResult> => {
     return { accepted: true, cancel: false };
   }
 
-  console.log(chalk.yellow(`Push cancelled\n`));
+  ui.warn(`Push cancelled\n`);
   return { accepted: false, cancel: true };
 };
 
@@ -94,6 +92,6 @@ export const interactivePRPrompt = async (
     return { accepted: true, cancel: false, base };
   }
 
-  console.log(chalk.yellow(`PR creation cancelled\n`));
+  ui.warn(`PR creation cancelled\n`);
   return { accepted: false, cancel: true, base: defaultBase };
 };

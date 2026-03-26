@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import { ui } from '../../utils/ui';
 import { generateAIResponse, getBranchPrompt } from '../../utils/ai';
 import { interactiveRefinePrompt } from '../../utils/inquirer';
 import { gitCheckoutNewBranch, gitRenameBranch } from '../../utils/git';
@@ -44,7 +44,7 @@ export default async ({
   const allBranchesSet = new Set(allBranches);
 
   while (!branchAccepted) {
-    const branchSpinner = ora('Generating branch name...').start();
+    const branchSpinner = ui.spinner('Generating branch name...');
 
     const rawBranch = await generateAIResponse(provider, branchPrompt);
 
@@ -67,8 +67,8 @@ export default async ({
 
     branchSpinner.succeed('Branch name generated:\\n');
 
-    console.log(chalk.magenta(branchName));
-    console.log('');
+    ui.log(chalk.magenta(branchName));
+    ui.newline();
 
     // auto accept if --yes
     if (flags?.yes) {
@@ -85,11 +85,11 @@ export default async ({
 
   // dry run support
   if (flags?.['dry-run']) {
-    console.log(chalk.yellow('Dry run enabled. Branch not created.\n'));
+    ui.warn('Dry run enabled. Branch not created.\n');
     return;
   }
 
-  const branchProcessSpinner = ora('Applying branch name...').start();
+  const branchProcessSpinner = ui.spinner('Applying branch name...');
 
   await gitCheckoutNewBranch(branchName);
 

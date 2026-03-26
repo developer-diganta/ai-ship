@@ -2,16 +2,27 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
+import { ui } from './ui';
+import { fetchGitRemoteOriginURL } from './git';
 type AIShipConfig = {
   provider: 'local' | 'cloud';
   model: string;
   localEndpoint?: string;
   geminiApiKey?: string;
+  'gitlab.baseUrl'?: string;
+  'gitlab.token'?: string;
 };
 
-const ALLOWED_KEYS = ['provider', 'model', 'localEndpoint', 'geminiApiKey'];
+const ALLOWED_KEYS = [
+  'provider',
+  'model',
+  'localEndpoint',
+  'geminiApiKey',
+  'gitlab.baseUrl',
+  'gitlab.token',
+];
 
-export const log = (data: any) => console.log(data);
+export const log = (data: any) => ui.log(data);
 
 // config dir for storing api key
 export const CONFIG_DIR = path.join(os.homedir(), '.ai-ship');
@@ -49,26 +60,37 @@ export const verboseConfig = (config: any) => {
     ? geminiApiKey.slice(0, 4) + '...' + geminiApiKey.slice(-4)
     : 'not configured';
 
-  console.log(chalk.bold('\nAI-Ship Configuration\n'));
+  const gitlabBaseUrl = config['gitlab.baseUrl'];
+  const gitlabToken = config['gitlab.token'];
+  const maskedGitlabToken = gitlabToken
+    ? gitlabToken.slice(0, 4) + '...' + gitlabToken.slice(-4)
+    : 'not configured';
 
-  console.log(chalk.yellow('Provider'));
-  console.log('  Current:', provider || 'not set');
-  console.log('  Description: Determines where AI runs (local via Ollama or cloud API)\n');
+  ui.header('AI-Ship Configuration');
 
-  console.log(chalk.yellow('Model'));
-  console.log('  Current:', model || 'not set');
-  console.log('  Description: AI model used for commit and branch generation\n');
+  ui.log(chalk.yellow('Provider'));
+  ui.log(`  Current: ${provider || 'not set'}`);
+  ui.log('  Description: Determines where AI runs (local via Ollama or cloud API)\n');
 
-  console.log(chalk.yellow('Local Model Settings'));
-  console.log('  Endpoint:', localEndpoint || 'not configured');
-  console.log('  Description: URL of the local model server (e.g. http://127.0.0.1:11434)\n');
+  ui.log(chalk.yellow('Model'));
+  ui.log(`  Current: ${model || 'not set'}`);
+  ui.log('  Description: AI model used for commit and branch generation\n');
 
-  console.log(chalk.yellow('Cloud Model Settings'));
-  console.log('  Gemini API Key:', maskedKey);
-  console.log('  Description: API key used when provider is set to cloud\n');
+  ui.log(chalk.yellow('Local Model Settings'));
+  ui.log(`  Endpoint: ${localEndpoint || 'not configured'}`);
+  ui.log('  Description: URL of the local model server (e.g. http://127.0.0.1:11434)\n');
+
+  ui.log(chalk.yellow('Cloud Model Settings'));
+  ui.log(`  Gemini API Key: ${maskedKey}`);
+  ui.log('  Description: API key used when provider is set to cloud\n');
+
+  ui.log(chalk.yellow('GitLab Settings'));
+  ui.log(`  Base URL: ${gitlabBaseUrl || 'not configured'}`);
+  ui.log(`  Token: ${maskedGitlabToken}`);
 };
 
 export const jsonConfig = (config: any) => {
+  const gitlabToken = config['gitlab.token'];
   const safeConfig = {
     provider: config.provider || null,
     model: config.model || null,
@@ -76,9 +98,11 @@ export const jsonConfig = (config: any) => {
     geminiApiKey: config.geminiApiKey
       ? config.geminiApiKey.slice(0, 4) + '...' + config.geminiApiKey.slice(-4)
       : null,
+    'gitlab.baseUrl': config['gitlab.baseUrl'] || null,
+    'gitlab.token': gitlabToken ? gitlabToken.slice(0, 4) + '...' + gitlabToken.slice(-4) : null,
   };
 
-  console.log(JSON.stringify(safeConfig, null, 2));
+  ui.log(JSON.stringify(safeConfig, null, 2));
 };
 
 const validateValue = (key: string, value: string) => {
@@ -108,6 +132,20 @@ const validateValue = (key: string, value: string) => {
         throw new Error('geminiApiKey must be a valid string');
       }
       break;
+
+    case 'gitlab.baseUrl':
+      try {
+        new URL(value);
+      } catch {
+        throw new Error('gitlab.baseUrl must be a valid URL');
+      }
+      break;
+
+    case 'gitlab.token':
+      if (typeof value !== 'string' || value.trim().length === 0) {
+        throw new Error('gitlab.token must be a valid string');
+      }
+      break;
   }
 };
 
@@ -134,12 +172,67 @@ export const saveValueToConfig = (key: string, value: string) => {
 
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 
-    console.log(chalk.green(`✔ Config updated: ${chalk.bold.green(key)}`));
+    ui.success(`Config updated: ${chalk.bold(key)}`);
   } catch (err: any) {
-    console.error(chalk.red(`❌ Failed to save config: ${chalk.bold.red(err.message)}`));
+    ui.error(`Failed to save config: ${chalk.bold(err.message)}`);
   }
 };
 
 export const getProvider = () => {
   return getCurrentConfig('provider');
+};
+
+export const getGitLabToken = () => {
+  return getCurrentConfig('gitlab.token');
+};
+
+export const detectRemoteHost = async () => {
+  const { stdout } = await fetchGitRemoteOriginURL();
+  if (stdout.includes('github')) return 'github';
+  if (stdout.includes('gitlab')) return 'gitlab';
+  return 'unknown';
+};
+
+export const extractProjectPath = (remoteUrl: string): string | null => {
+  try {
+    const url = remoteUrl.trim();
+
+    // SSH format
+    if (url.startsWith('git@')) {
+      const match = url.match(/:(.*)\.git$/);
+      return match ? match[1] : null;
+    }
+
+    // HTTPS format
+    if (url.startsWith('http')) {
+      const match = url.match(/https?:\/\/[^/]+\/(.*)\.git$/);
+      return match ? match[1] : null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export const extractBaseUrl = (remoteUrl: string): string | null => {
+  try {
+    const url = remoteUrl.trim();
+
+    // SSH: git@gitlab.com:group/repo.git
+    if (url.startsWith('git@')) {
+      const match = url.match(/@(.*?):/);
+      return match ? `https://${match[1]}` : null;
+    }
+
+    // HTTPS: https://gitlab.com/group/repo.git
+    if (url.startsWith('http')) {
+      const match = url.match(/(https?:\/\/[^/]+)/);
+      return match ? match[1] : null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 };

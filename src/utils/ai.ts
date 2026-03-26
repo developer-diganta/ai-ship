@@ -44,10 +44,6 @@ export const generateAIResponse = async (
 
     let output = cleanGemmaOutput(raw);
 
-    // 🔍 debug (keep temporarily)
-    console.log('RAW GEMMA:', raw);
-    console.log('CLEANED:', output);
-
     // 🔥 fallback logic
     if (isBadOutput(output)) {
       if (intent) {
@@ -92,8 +88,6 @@ export const generateReviewResponse = async (provider: string, prompt: string): 
     if (provider === 'local') {
       const raw = await generateWithGemma(prompt);
 
-      console.log('RAW GEMMA:', raw);
-
       // ❗ DO NOT clean like commit
       const output = raw?.trim();
 
@@ -117,7 +111,7 @@ Looks good overall. No major issues found.
 `
     );
   } catch (err) {
-    console.log('AI Review Error:', err);
+    // ui.error('AI Review Error');
 
     return `
 REVIEW:

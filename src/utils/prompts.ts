@@ -235,3 +235,38 @@ DESCRIPTION:
 <optional, only if needed>
 `;
 };
+
+export type ReviewFilePatch = {
+  file: string;
+  patches: string[];
+};
+
+export const buildReviewPrompt = (files: ReviewFilePatch[], commits: string[]) => `
+You are a senior engineer reviewing code.
+
+Focus ONLY on bugs, edge cases, bad practices.
+
+Be concise.
+
+Commits:
+${commits.join('\n')}
+
+${files
+  .map(
+    (f) => `
+File: ${f.file}
+${f.patches.join('\n')}
+`,
+  )
+  .join('\n')}
+
+Output:
+
+REVIEW:
+[file: <filename>]
+- [severity: critical|warning] issue
+
+OPTIONAL IMPROVEMENTS:
+[file: <filename>]
+- suggestion
+`;

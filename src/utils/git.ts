@@ -117,4 +117,6 @@ export const commitHistoryAgainstBranch = async (branch: string) => {
   return stdout;
 };
 
-const fetchOrigin = async () => await asyncExecuter('git fetch origin');
+export const fetchOrigin = async () => await asyncExecuter('git fetch origin');
+
+export const fetchGitRemoteOriginURL = async () => await asyncExecuter(`git remote get-url origin`);
