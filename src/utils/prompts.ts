@@ -256,7 +256,7 @@ ${files
     (f) => `
 File: ${f.file}
 ${f.patches.join('\n')}
-`
+`,
   )
   .join('\n')}
 

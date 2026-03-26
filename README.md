@@ -16,12 +16,14 @@
 - **🤖 Provider Agnostic:** Works beautifully with **Google Gemini** (Cloud) out-of-the-box or **Ollama** for entirely private, local execution.
 - **🛡️ Dry Runs & Pre-flights:** Want to see what the AI cooks up without mutating your local Git repository? Use `--dry-run`.
 - **✍️ Interactive Refinements:** Don't like the drafted message? Instantly edit it, request a retry, or skip.
+- **🎨 Beautiful, Professional CLI:** Enjoy a sleek, modern terminal interface with custom animated spinners, colored outputs, and structured logging that elevates your entire experience.
 
 ---
 
 ## 📦 Prerequisites
 
 Before deploying AI-Ship, ensure your machine meets the following structural requirements:
+
 1. **[Node.js](https://nodejs.org/)** (v18 or higher recommended)
 2. **[Git](https://git-scm.com/)** installed and initialized in your working repository.
 3. **[GitHub CLI (`gh`)](https://cli.github.com/)** installed and authenticated (required exclusively if you use `--pr` flows).
@@ -34,17 +36,20 @@ Before deploying AI-Ship, ensure your machine meets the following structural req
 For now, AI-Ship can be run directly from source.
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/developer-diganta/ai-ship.git
    cd ai-ship
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Build the CLI executable:**
+
    ```bash
    npm run build
    ```
@@ -53,7 +58,7 @@ For now, AI-Ship can be run directly from source.
    ```bash
    npm link
    ```
-   *This globally registers the `ai-ship` command in your terminal so it can be initiated in any Git repository on your system.*
+   _This globally registers the `ai-ship` command in your terminal so it can be initiated in any Git repository on your system._
 
 ---
 
@@ -62,28 +67,37 @@ For now, AI-Ship can be run directly from source.
 Control how AI-Ship operates directly from the CLI via the `config` command.
 
 ### 🔑 Set up your API Key (Cloud/Gemini)
+
 To utilize the Gemini API connection:
+
 ```bash
 ai-ship config --add-key
 ```
-*It will securely prompt for your API key and store it locally.*
+
+_It will securely prompt for your API key and store it locally._
 
 To remove your key:
+
 ```bash
 ai-ship config --delete-key
 ```
 
 ### 🧠 Change AI Provider (Local vs Cloud)
-If you prefer running a local execution without making network API calls to Cloud AI models, you can switch providers. *(Requires a local Ollama server)*:
+
+If you prefer running a local execution without making network API calls to Cloud AI models, you can switch providers. _(Requires a local Ollama server)_:
+
 ```bash
 ai-ship config set provider local
 ```
+
 To switch back to the cloud via Google Gemini:
+
 ```bash
 ai-ship config set provider cloud
 ```
 
 ### 🧾 View Current Config
+
 ```bash
 ai-ship config show --verbose
 ```
@@ -92,17 +106,20 @@ ai-ship config show --verbose
 
 ## 🚢 Usage
 
-At its core, `ai-ship` hooks into your uncommitted, staged files. 
+At its core, `ai-ship` hooks into your uncommitted, staged files.
 
 ### Basic Usage
 
 Stage your files as usual (`git add .`), then draft an AI commit:
+
 ```bash
 ai-ship commit
 ```
-> *Note: If you run `ai-ship commit` without staging, AI-Ship will automatically run `git add -A` for you!*
+
+> _Note: If you run `ai-ship commit` without staging, AI-Ship will automatically run `git add -A` for you!_
 
 You can also pass specific files to be explicitly staged:
+
 ```bash
 ai-ship commit src/index.ts src/utils/helper.ts
 ```
@@ -112,10 +129,13 @@ ai-ship commit src/index.ts src/utils/helper.ts
 AI-Ship can condense the 5 basic Git commands down into **one single instruction**.
 
 **🔥 The Ultimate CLI Combo (Commit, Branch, Push, PR):**
+
 ```bash
 ai-ship commit --new-branch --push --pr --yes
 ```
-*What this single command achieved:*
+
+_What this single command achieved:_
+
 1. Auto-staged all tracked changes.
 2. Read the unified diff and generated a beautiful Commit Message.
 3. Examined that context and automatically made a new branch (e.g., `feature/add-payment-gate`).
@@ -124,23 +144,25 @@ ai-ship commit --new-branch --push --pr --yes
 6. Auto-published the PR on GitHub without asking for manual confirmation (`--yes`).
 
 ### 🎌 Command Flags
+
 Append these arguments upon the `commit` hook to modify AI-Ship's behavior:
 
-| Flag | Action |
-| --- | --- |
-| `--new-branch` | Analyzes commit context, drafts a semantic branch name, & securely checks it out. |
-| `--push` | Triggers a `git push`. If there isn't an upstream anchor configured, securely configures tracking mappings for you. |
-| `--pr` | Utilizes the GitHub CLI to publish an intelligent PR onto default target branches. Prompts interactions manually if omitted. |
-| `--target-branch <branch>` | Manually overrides the base branch point targeting your `--pr`. |
-| `--yes` | Headless execution. Skips interactive "Edit/Continue/Cancel" refinements and accepts the AI's first guess automatically. |
-| `--dry-run` | Reads files, interfaces with the AI layer, and outputs responses without actually performing Git mutations. Great for observing syntax. |
-| `--model <provider>` | Inline injection overriding the globally chosen logic model (e.g `--model local` or `--model cloud`). |
+| Flag                       | Action                                                                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `--new-branch`             | Analyzes commit context, drafts a semantic branch name, & securely checks it out.                                                       |
+| `--push`                   | Triggers a `git push`. If there isn't an upstream anchor configured, securely configures tracking mappings for you.                     |
+| `--pr`                     | Utilizes the GitHub CLI to publish an intelligent PR onto default target branches. Prompts interactions manually if omitted.            |
+| `--target-branch <branch>` | Manually overrides the base branch point targeting your `--pr`.                                                                         |
+| `--yes`                    | Headless execution. Skips interactive "Edit/Continue/Cancel" refinements and accepts the AI's first guess automatically.                |
+| `--dry-run`                | Reads files, interfaces with the AI layer, and outputs responses without actually performing Git mutations. Great for observing syntax. |
+| `--model <provider>`       | Inline injection overriding the globally chosen logic model (e.g `--model local` or `--model cloud`).                                   |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are heavily welcomed! 
+Contributions are heavily welcomed!
+
 1. **Fork** the repository
 2. Implement your magic fix or feature branch (`git checkout -b feature/magic-fix`)
 3. Pass through Prettier & Typescript integrations by running `npm run build && npm run format`

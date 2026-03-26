@@ -6,8 +6,8 @@ import { filterNoiseFiles } from '../../utils/parser';
 import { analyzeDiff } from '../../analyzers/analyzer';
 import { generateAIResponse, getCommitPrompt } from '../../utils/ai';
 import { interactiveRefinePrompt } from '../../utils/inquirer';
-import ora from 'ora';
 import { buildIntent } from '../../analyzers/buildIntent';
+import { ui } from '../../utils/ui';
 
 let provider = getProvider();
 
@@ -19,13 +19,8 @@ export default async (flags: any = {}) => {
 
     const runProvider = flags.model ? flags.model : provider;
 
-    console.log('');
-    console.log(chalk.bold.bgBlue(' 🚀 AI-SHIP ') + chalk.bold.blue(' Commit Generator '));
-    console.log(chalk.dim('==================================='));
-    console.log('');
-
     // 1️⃣ Get staged files
-    const scanSpinner = ora('Scanning staged files...').start();
+    const scanSpinner = ui.spinner('Scanning staged files...');
     const filesChanged = await getFilesChanged();
 
     if (!filesChanged.length) {
@@ -44,12 +39,12 @@ export default async (flags: any = {}) => {
 
     scanSpinner.succeed(`Found ${filesChanged.length} staged file(s).`);
 
-    console.log(chalk.dim('Files changed:'));
-    filesChanged.forEach((f) => console.log(chalk.green(`  + ${f.file}`)));
-    console.log('');
+    ui.dim('Files changed:');
+    filesChanged.forEach((f) => ui.success(`+ ${f.file}`));
+    ui.newline();
 
     // 5️⃣ Analyze diff
-    const analyzeSpinner = ora('Analyzing file changes changes').start();
+    const analyzeSpinner = ui.spinner('Analyzing file changes changes');
 
     const diffs = await getStagedDiff(filenames);
     const diffSummary = analyzeDiff(diffs);
@@ -61,20 +56,20 @@ export default async (flags: any = {}) => {
     let commitAccepted = false;
 
     while (!commitAccepted) {
-      const commitSpinner = ora('Generating commit message...').start();
+      const commitSpinner = ui.spinner('Generating commit message...');
 
       const prompt = getCommitPrompt(runProvider, diffSummary, intent);
-        commitMessage = await generateAIResponse(runProvider, prompt, intent);
+      commitMessage = await generateAIResponse(runProvider, prompt, intent);
 
       commitSpinner.succeed('Commit message generated:\\n');
 
-      console.log(chalk.cyan(commitMessage));
-      console.log('');
+      ui.log(chalk.cyan(commitMessage));
+      ui.newline();
 
       // dry-run → exit early
       if (flags['dry-run']) {
-        console.log(chalk.yellow('Dry run enabled. Commit not executed.\\n'));
-        const unstageSpinner = ora('Unstaging files...').start();
+        ui.warn('Dry run enabled. Commit not executed.\\n');
+        const unstageSpinner = ui.spinner('Unstaging files...');
         await unstageFiles();
         unstageSpinner.succeed('Files unstaged.');
         return;
@@ -94,17 +89,16 @@ export default async (flags: any = {}) => {
     }
 
     // 7️⃣ Commit
-    const commitSpinner = ora('Committing changes...').start();
+    const commitSpinner = ui.spinner('Committing changes...');
     await gitCommit(commitMessage);
     commitSpinner.succeed('Changes successfully committed!\n');
     return { commitMessage, diffSummary, runProvider };
   } catch (err) {
-    console.log(err);
     if ((err as Error).name === 'ExitPromptError') {
-      console.log(chalk.yellow('\nProcess aborted using user prompt.\n'));
+      ui.warn('\nProcess aborted using user prompt.\n');
       return;
     }
 
-    log(chalk.red(`We ran into an error: ${err}`));
+    ui.error(`We ran into an error: ${err}`);
   }
 };
