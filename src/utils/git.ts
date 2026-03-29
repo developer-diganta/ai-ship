@@ -108,12 +108,16 @@ export const push = async () => {
 };
 
 export const diffAgainstBranch = async (branch: string) => {
-  const { stdout } = await asyncExecuter(`git diff ${branch}...HEAD`);
+  const { stdout } = await asyncExecuter(
+    `git diff ${branch}`
+  );
   return stdout;
 };
 
 export const commitHistoryAgainstBranch = async (branch: string) => {
-  const { stdout } = await asyncExecuter(`git log ${branch}...HEAD --oneline`);
+  const { stdout } = await asyncExecuter(
+    `git log ${branch}..HEAD --oneline`
+  );
   return stdout;
 };
 

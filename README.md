@@ -1,178 +1,308 @@
-<div align="center">
-  <img alt="AI-Ship Logo" src="https://img.icons8.com/nolan/256/spaceship.png" width="120" />
-  <h1>🚀 AI-SHIP</h1>
-  <p><strong>Your ultimate AI-powered terminal assistant for seamless Git workflows.</strong></p>
-  <p>Dynamically analyzes your code diffs to automatically write robust and contextual commit messages, generate meaningful branch names, push your changes, and spin up intelligent GitHub Pull Requests—all without ever leaving your terminal.</p>
-</div>
+# 🚀 AI-Ship
 
-<br />
+> **Review your code before your PR. Ship with confidence.**
 
-## ✨ Features
+AI-Ship is a **Git Intelligence CLI** that helps you:
 
-- **🧠 Deep Code Analysis:** AI-Ship doesn't just read filenames. It reads your raw `git diff` outputs, intelligently filters out noise (like lockfiles), and evaluates the actual intent of your code changes.
-- **📝 Automated Intelligent Commits:** Say goodbye to "fixed bug" or "updated code". AI-Ship drafts rich, standard-compliant commit messages highlighting semantic changes.
-- **🌿 Smart Branch Name Generation:** Need a new feature branch? Throw in `--new-branch` to let AI-Ship read your commit's context, draft a descriptive semantic branch name (e.g. `feature/implement-user-auth`), automatically apply branch collision defenses, and check it out for you.
-- **🚀 One-command PR Pipelines:** Complete your entire development phase in one go. Using `ai-ship commit --push --pr` takes your staged changes, commits them intelligibly, pushes them directly to `origin`, and opens a full contextual Pull Request over the GitHub CLI.
-- **🤖 Provider Agnostic:** Works beautifully with **Google Gemini** (Cloud) out-of-the-box or **Ollama** for entirely private, local execution.
-- **🛡️ Dry Runs & Pre-flights:** Want to see what the AI cooks up without mutating your local Git repository? Use `--dry-run`.
-- **✍️ Interactive Refinements:** Don't like the drafted message? Instantly edit it, request a retry, or skip.
-- **🎨 Beautiful, Professional CLI:** Enjoy a sleek, modern terminal interface with custom animated spinners, colored outputs, and structured logging that elevates your entire experience.
+* generate commits
+* create PRs / MRs
+* review your code with AI
+
+👉 All **before your code leaves your machine**
+
+---
+<br/>
+
+# 🔥 Why AI-Ship?
+
+### The problem
+
+- Writing meaningful commit messages is harder than it should be  
+- Naming branches consistently breaks developer flow  
+- PR reviews come **too late** — basic issues slip through  
+- Reviewers spend time on **avoidable mistakes**  
+- AI tools (like Copilot) help write code — but don’t understand your **full Git diff**  
+
+👉 Git workflows remain manual where they should be intelligent
 
 ---
 
-## 📦 Prerequisites
+### The solution
 
-Before deploying AI-Ship, ensure your machine meets the following structural requirements:
+Run this before pushing:
 
-1. **[Node.js](https://nodejs.org/)** (v18 or higher recommended)
-2. **[Git](https://git-scm.com/)** installed and initialized in your working repository.
-3. **[GitHub CLI (`gh`)](https://cli.github.com/)** installed and authenticated (required exclusively if you use `--pr` flows).
-4. **An API Access key** for Google Gemini, **OR** a local instance of [Ollama](https://ollama.com/) running locally.
+```bash
+ai-ship review main
+```
+
+👉 Get:
+
+* 🔴 Critical bugs
+* 🟡 Warnings
+* 🟢 Improvements
+
+**Before your PR even exists.**
 
 ---
 
-## 🛠️ Installation & Setup
+# ⚡ What AI-Ship Does
 
-For now, AI-Ship can be run directly from source.
+## 🧠 1. AI Code Review (Core Feature 🔥)
 
-1. **Clone the repository:**
+Analyze your code changes using:
 
-   ```bash
-   git clone https://github.com/developer-diganta/ai-ship.git
-   cd ai-ship
-   ```
+* `git diff` (actual changes)
+* intelligent filtering (no noise)
+* signal-based analysis (not just keywords)
+* AI (Gemini + local fallback)
 
-2. **Install dependencies:**
+👉 Output:
 
-   ```bash
-   npm install
-   ```
-
-3. **Build the CLI executable:**
-
-   ```bash
-   npm run build
-   ```
-
-4. **Link globally (Optional but recommended):**
-   ```bash
-   npm link
-   ```
-   _This globally registers the `ai-ship` command in your terminal so it can be initiated in any Git repository on your system._
+* structured feedback
+* severity classification
+* clean HTML report
 
 ---
 
-## ⚙️ Configuration
-
-Control how AI-Ship operates directly from the CLI via the `config` command.
-
-### 🔑 Set up your API Key (Cloud/Gemini)
-
-To utilize the Gemini API connection:
-
-```bash
-ai-ship config --add-key
-```
-
-_It will securely prompt for your API key and store it locally._
-
-To remove your key:
-
-```bash
-ai-ship config --delete-key
-```
-
-### 🧠 Change AI Provider (Local vs Cloud)
-
-If you prefer running a local execution without making network API calls to Cloud AI models, you can switch providers. _(Requires a local Ollama server)_:
-
-```bash
-ai-ship config set provider local
-```
-
-To switch back to the cloud via Google Gemini:
-
-```bash
-ai-ship config set provider cloud
-```
-
-### 🧾 View Current Config
-
-```bash
-ai-ship config show --verbose
-```
-
----
-
-## 🚢 Usage
-
-At its core, `ai-ship` hooks into your uncommitted, staged files.
-
-### Basic Usage
-
-Stage your files as usual (`git add .`), then draft an AI commit:
+## ✨ 2. Smart Commits
 
 ```bash
 ai-ship commit
 ```
 
-> _Note: If you run `ai-ship commit` without staging, AI-Ship will automatically run `git add -A` for you!_
+* Generates meaningful commit messages
+* Based on actual code changes
+* Avoids generic commits like "fix stuff"
 
-You can also pass specific files to be explicitly staged:
+---
+
+## 🌿 3. Smart Branch Naming
 
 ```bash
-ai-ship commit src/index.ts src/utils/helper.ts
+--new-branch
 ```
 
-### Advanced Pipeline Workflows
+* AI-generated semantic branch names
+* Example: `feature/add-user-auth`
 
-AI-Ship can condense the 5 basic Git commands down into **one single instruction**.
+---
 
-**🔥 The Ultimate CLI Combo (Commit, Branch, Push, PR):**
+## 🚀 4. One-Command Workflow
 
 ```bash
 ai-ship commit --new-branch --push --pr --yes
 ```
 
-_What this single command achieved:_
+👉 This does everything:
 
-1. Auto-staged all tracked changes.
-2. Read the unified diff and generated a beautiful Commit Message.
-3. Examined that context and automatically made a new branch (e.g., `feature/add-payment-gate`).
-4. Directly pushed the new upstream branch to origin.
-5. Invoked the `gh` CLI to summarize the commit history into a Pull Request Description.
-6. Auto-published the PR on GitHub without asking for manual confirmation (`--yes`).
-
-### 🎌 Command Flags
-
-Append these arguments upon the `commit` hook to modify AI-Ship's behavior:
-
-| Flag                       | Action                                                                                                                                  |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `--new-branch`             | Analyzes commit context, drafts a semantic branch name, & securely checks it out.                                                       |
-| `--push`                   | Triggers a `git push`. If there isn't an upstream anchor configured, securely configures tracking mappings for you.                     |
-| `--pr`                     | Utilizes the GitHub CLI to publish an intelligent PR onto default target branches. Prompts interactions manually if omitted.            |
-| `--target-branch <branch>` | Manually overrides the base branch point targeting your `--pr`.                                                                         |
-| `--yes`                    | Headless execution. Skips interactive "Edit/Continue/Cancel" refinements and accepts the AI's first guess automatically.                |
-| `--dry-run`                | Reads files, interfaces with the AI layer, and outputs responses without actually performing Git mutations. Great for observing syntax. |
-| `--model <provider>`       | Inline injection overriding the globally chosen logic model (e.g `--model local` or `--model cloud`).                                   |
+* Stage changes
+* Generate commit
+* Create branch
+* Push to remote
+* Open PR / MR (GitLab supported)
 
 ---
 
-## 🤝 Contributing
+## 🔍 5. Pre-PR Review System
 
-Contributions are heavily welcomed!
+AI-Ship is NOT a PR bot.
 
-1. **Fork** the repository
-2. Implement your magic fix or feature branch (`git checkout -b feature/magic-fix`)
-3. Pass through Prettier & Typescript integrations by running `npm run build && npm run format`
-4. Use AI-Ship to push your PR logic gracefully.
-5. Submit your **Pull Request**.
+👉 It runs **before PR creation**
 
-If you locate any discrepancies or issues, please [file a new GitHub Issue](https://github.com/developer-diganta/ai-ship/issues).
+* No spam comments
+* No noise in GitHub/GitLab
+* Private, fast, local feedback
 
-<br />
+---
 
-<div align="center">
-  <p>Built with 🩵 by <a href="https://github.com/developer-diganta">Diganta</a></p>
-</div>
+## ⚙️ 6. Configurable AI Providers
+
+Supports:
+
+* **Gemini (cloud)** → fast + powerful
+* **Ollama (local)** → private + offline
+
+```bash
+ai-ship config set provider local
+ai-ship config set gitlab.token <token>
+ai-ship config set gitlab.baseUrl https://gitlab.com
+```
+
+---
+
+## 🧩 7. Intelligent Diff Processing
+
+AI-Ship doesn't blindly send diffs.
+
+It:
+
+* extracts meaningful patches
+* scores them using signals (conditions, loops, API calls, etc.)
+* filters noise (lockfiles, low-signal changes)
+
+👉 Result: **better AI output**
+
+---
+
+## 🧠 8. Signal-Based Review Engine
+
+Instead of keyword matching, AI-Ship detects:
+
+* conditions
+* functions
+* loops
+* API calls
+* DB queries
+* error handling
+
+👉 This makes reviews:
+
+* more accurate
+* less noisy
+* language-flexible (and ready for Tree-sitter)
+
+---
+
+## 📄 9. HTML Review Report
+
+AI-Ship generates a clean HTML report:
+
+* grouped by file
+* severity-based coloring
+* summary at top
+
+👉 Easy to scan, easy to act
+
+---
+
+# 🔍 Example Output
+
+```txt
+[file: auth.js]
+
+signals: condition_added(2), api_call(1)
+
+- [critical] Possible assignment instead of comparison
+- [warning] Missing error handling in API call
+```
+
+---
+
+# 🛠️ Installation
+
+```bash
+git clone https://github.com/developer-diganta/ai-ship.git
+cd ai-ship
+npm install
+npm run build
+npm link
+```
+
+---
+
+# 🚢 Usage
+
+## Basic commit
+
+```bash
+ai-ship commit
+```
+
+## Review before PR
+
+```bash
+ai-ship review main
+```
+
+## Full workflow
+
+```bash
+ai-ship commit --new-branch --push --pr --yes
+```
+
+---
+
+# 🎛️ CLI Options
+
+| Flag                 | Description                |
+| -------------------- | -------------------------- |
+| `--new-branch`       | Create AI-generated branch |
+| `--push`             | Push to remote             |
+| `--pr`               | Create PR / MR             |
+| `--yes`              | Skip confirmations         |
+| `--dry-run`          | Preview without executing  |
+
+
+---
+
+# ⚙️ Configuration
+
+```bash
+ai-ship config set provider local
+ai-ship config set gitlab.token <token>
+ai-ship config show --verbose
+```
+
+Config stored in:
+
+```
+~/.ai-ship/config.json
+```
+
+---
+
+# 🧠 Philosophy
+
+> “Review your code before the world sees it.”
+
+AI-Ship is:
+
+* ❌ Not a chatbot
+* ❌ Not a PR comment bot
+* ✅ A local developer assistant
+
+---
+
+# ⚠️ Current Limitations
+
+* HTML UI is minimal (improving)
+* No line-level annotations (yet)
+* Limited language awareness (Tree-sitter planned)
+
+---
+
+# 🗺️ Roadmap
+
+* [ ] Tree-sitter integration (better multi-language support)
+* [ ] Line-level annotations
+* [ ] Enhanced HTML UI
+* [ ] VS Code extension
+
+
+---
+
+# 🤝 Contributing
+
+PRs are welcome!
+
+1. Fork the repo
+2. Create your branch
+3. Submit a PR
+
+---
+
+# 👨‍💻 Author
+
+Built by Diganta
+
+---
+
+# ⭐ Final Thought
+
+AI-Ship introduces a new idea:
+
+> **Pre-PR Code Intelligence**
+
+Let AI-SHIP handle all the git workflows while you focus on what goes into the code!
+
+---
