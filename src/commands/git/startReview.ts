@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import { ui } from '../../utils/ui';
 import fs from 'fs';
 import path from 'path';
-import open from 'open';
 
 import { commitHistoryAgainstBranch, diffAgainstBranch, gitFetch } from '../../utils/git';
 
@@ -58,7 +57,7 @@ export const startReview = async (flags: any = {}) => {
     fs.writeFileSync(filePath, html);
 
     ui.success('Opening review in browser...\n');
-
+const open = (await import('open')).default;
     await open(filePath);
   } catch (err: any) {
     ui.error(`Review failed: ${err?.message || err}`);
